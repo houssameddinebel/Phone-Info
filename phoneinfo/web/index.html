@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PhoneInfo</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel-2:#1c2230; --line:#2a3240;
+    --fg:#e6edf3; --muted:#8b98a9; --accent:#4493f8; --ok:#3fb950;
+    --warn:#d29922; --bad:#f85149;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+    font:15px/1.55 ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif}
+  header{padding:22px 28px 18px;border-bottom:1px solid var(--line);
+    display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  header h1{margin:0;font-size:20px;letter-spacing:-.3px}
+  header .tag{font-size:12px;color:var(--muted);
+    border:1px solid var(--line);border-radius:999px;padding:2px 10px}
+  .wrap{display:grid;grid-template-columns:340px 1fr;gap:22px;padding:24px 28px;align-items:start}
+  @media(max-width:820px){.wrap{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+  label{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.6px;
+    color:var(--muted);margin:0 0 6px}
+  input[type=text],select{width:100%;padding:10px 12px;border-radius:8px;
+    border:1px solid var(--line);background:var(--panel-2);color:var(--fg);font:inherit}
+  input[type=text]:focus,select:focus{outline:none;border-color:var(--accent)}
+  .field{margin-bottom:14px}
+  .row{display:flex;gap:8px}
+  .row>*{flex:1}
+  button{width:100%;margin-top:6px;padding:11px;border:0;border-radius:8px;
+    background:var(--accent);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+  button:hover{filter:brightness(1.1)}
+  button:disabled{opacity:.55;cursor:default}
+  .checks{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px}
+  .checks label{display:flex;align-items:center;gap:7px;text-transform:none;
+    letter-spacing:0;font-size:13px;color:var(--fg);margin:0;cursor:pointer}
+  .hint{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5}
+  pre{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;
+    padding:12px;overflow:auto;font-size:12.5px;margin:0}
+  .empty{color:var(--muted);padding:34px 6px;text-align:center}
+  dl{margin:0;display:grid;grid-template-columns:170px 1fr;gap:0}
+  dt,dd{margin:0;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+  dt{color:var(--muted)}
+  dd{word-break:break-word}
+  dl :nth-last-child(-n+2){border-bottom:0}
+  .badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;
+    background:var(--panel-2);border:1px solid var(--line)}
+  .badge.ok{color:var(--ok);border-color:#1f4d2b}
+  .badge.bad{color:var(--bad);border-color:#5c1f1c}
+  .note{margin-top:14px;font-size:12.5px;color:var(--muted);
+    border-left:2px solid var(--warn);padding:2px 0 2px 12px}
+  .sect{margin:20px 0 8px;font-size:12px;text-transform:uppercase;
+    letter-spacing:.6px;color:var(--muted)}
+  a{color:var(--accent)}
+  .err{color:var(--bad)}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
+  .chip{width:auto;margin:0;padding:6px 11px;background:var(--panel-2);color:var(--fg);
+    border:1px solid var(--line);border-radius:999px;font-size:13px;font-weight:500;
+    text-align:left;cursor:pointer}
+  .chip:hover{border-color:var(--accent);filter:none}
+  .chip b{font-weight:600}
+  .chip span{color:var(--muted);font-weight:400}
+  .linkbtn{width:auto;margin:0 2px;padding:0;background:none;border:0;color:var(--accent);
+    font:inherit;font-weight:500;text-decoration:underline;cursor:pointer}
+  .linkbtn:hover{filter:brightness(1.15)}
+</style>
+</head>
+<body>
+<header>
+  <h1>PhoneInfo</h1>
+  <span class="tag">offline engine</span>
+  <span class="tag">prefix region, not live location</span>
+</header>
+
+<div class="wrap">
+  <section class="panel">
+    <div class="field">
+      <label for="number">Phone number</label>
+      <input id="number" type="text" placeholder="+14155552671" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="row field">
+      <div>
+        <label for="region">Default region</label>
+        <select id="region">
+          <option value="">— none —</option>
+        </select>
+        <div class="hint" style="margin-top:6px">Required for numbers without a
+          <code>+</code> country code. Type to jump (Morocco is <strong>MA</strong>).
+          Remembered in this browser.</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Carrier enrichment</label>
+      <div class="checks">
+        <label><input type="checkbox" value="veriphone"> veriphone</label>
+        <label><input type="checkbox" value="numverify"> numverify</label>
+        <label><input type="checkbox" value="twilio"> twilio</label>
+        <label><input type="checkbox" value="abstractapi"> abstractapi</label>
+      </div>
+    </div>
+    <button id="go">Look up</button>
+    <div class="hint">
+      Runs with no network access. Enrichment providers need API keys set as
+      environment variables — unchecked or unkeyed providers are skipped.
+    </div>
+  </section>
+
+  <section class="panel" id="out">
+    <div class="empty">Enter a number and hit <strong>Look up</strong>.</div>
+  </section>
+</div>
+
+<script>
+const out = document.getElementById('out');
+const go  = document.getElementById('go');
+const regionEl = document.getElementById('region');
+const REGION_KEY = 'phoneinfo.region';
+
+function saveRegion(){
+  try{ localStorage.setItem(REGION_KEY, regionEl.value); }catch(e){}
+}
+
+async function loadRegions(){
+  try{
+    const res = await fetch('/api/regions');
+    const {regions} = await res.json();
+    regions.forEach(({code, name}) => {
+      const opt = document.createElement('option');
+      opt.value = code;
+      opt.textContent = (name === code) ? code : `${name} (${code})`;
+      regionEl.appendChild(opt);
+    });
+  }catch(e){ /* offline list is optional; the lookup still works with +numbers */ }
+
+  try{
+    const saved = localStorage.getItem(REGION_KEY);
+    if (saved) regionEl.value = saved;
+  }catch(e){}
+}
+
+const esc = s => String(s).replace(/[&<>"']/g, c =>
+  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function badge(text, kind){
+  return `<span class="badge ${kind||''}">${esc(text)}</span>`;
+}
+
+function row(label, value){
+  const v = (value === null || value === undefined || value === '') ? '—' : value;
+  return `<dt>${esc(label)}</dt><dd>${v}</dd>`;
+}
+
+function render(d){
+  if (d.error){
+    let html = `<div class="err"><strong>${esc(d.error)}</strong></div>`;
+    const c = d.candidates || [];
+    if (c.length){
+      html += `<div class="sect">That local number is valid in ${c.length} countries</div>
+        <div class="chips">` + c.map(x =>
+          `<button class="chip" data-region="${esc(x.region)}">
+             <b>${esc(x.country)}</b> <span>${esc(x.region)} · ${esc(x.international)}</span>
+           </button>`).join('') + `</div>
+        <div class="note">A number without a country code can belong to any of these.
+          Pick one to run the lookup.</div>`;
+    }
+    out.innerHTML = html;
+    wire();
+    return;
+  }
+
+  const valid = d.valid
+    ? badge('valid', 'ok') : badge('invalid', 'bad');
+  const portability = d.line_type === 'mobile'
+    ? '<span style="color:var(--warn)">mobile — the prefix shows who the block was allocated to, not necessarily who serves it now</span>'
+    : 'for fixed lines the prefix is geographically bound';
+
+  let html = `<dl>
+    ${row('input', esc(d.input))}
+    ${row('e164', esc(d.e164))}
+    ${row('international', esc(d.international))}
+    ${row('national', esc(d.national))}
+    ${row('status', valid + ' &nbsp; ' + badge(d.possible ? 'possible' : 'impossible'))}
+    ${row('country', esc(d.country_name || '—') + ` (${esc(d.region_code || '?')}, +${esc(d.country_code)})`)}
+    ${row('mcc', esc(d.mcc || '—'))}
+    ${row('prefix region', `<strong>${esc(d.prefix_location || '—')}</strong>`)}
+    ${row('allocated to', esc(d.allocated_carrier || '—') + ' <span style="color:var(--muted)">(from prefix)</span>')}
+    ${row('line type', badge(d.line_type))}
+    ${row('timezones', esc((d.timezones || []).join(', ') || '—'))}
+  </dl>
+  <div class="note">${portability}</div>`;
+
+  if (d.assumed_region){
+    const alts = (d.candidates || []).filter(c => c.region !== d.assumed_region).slice(0, 12);
+    html += `<div class="note"><strong>Read as a ${esc(d.country_name || d.assumed_region)}
+      number</strong> because it has no <code>+</code> country code.
+      <button class="linkbtn" id="clearRegion">clear the region</button>
+      to be asked next time.</div>`;
+    if (alts.length){
+      html += `<div class="sect">This same number is valid in ${alts.length} other countries</div>
+        <div class="chips">` + alts.map(x =>
+          `<button class="chip" data-region="${esc(x.region)}">
+             <b>${esc(x.country)}</b> <span>${esc(x.region)} · ${esc(x.international)}</span>
+           </button>`).join('') + `</div>`;
+    }
+  }
+
+  if (d.prefix_location){
+    const q = encodeURIComponent(d.prefix_location);
+    html += `<div class="note">Prefix region is the area the number block was
+      <em>issued</em> in. <a target="_blank" rel="noopener"
+      href="https://www.openstreetmap.org/search?query=${q}">View on map</a>
+      — this is not where the phone is.</div>`;
+  }
+
+  const e = d.enrichment;
+  if (e){
+    html += `<div class="sect">Carrier enrichment</div>`;
+    const names = Object.keys(e.results);
+    if (names.length){
+      names.forEach(n => {
+        html += `<dl>` + Object.entries(e.results[n]).map(
+          ([k,v]) => row(n + ' · ' + k, esc(v))).join('') + `</dl>`;
+      });
+    } else {
+      html += `<div class="hint">No provider returned data.</div>`;
+    }
+    const skip = Object.entries(e.skipped || {});
+    if (skip.length){
+      html += `<div class="hint">skipped: ` + skip.map(
+        ([k,v]) => `${esc(k)} (${esc(v)})`).join('<br>') + `</div>`;
+    }
+    Object.entries(e.errors || {}).forEach(([k,v]) => {
+      html += `<div class="hint err">${esc(k)}: ${esc(v)}</div>`;
+    });
+  }
+
+  out.innerHTML = html;
+  wire();
+}
+
+function wire(){
+  out.querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => {
+    regionEl.value = b.dataset.region;
+    saveRegion();
+    lookup();
+  }));
+  const clear = out.querySelector('#clearRegion');
+  if (clear) clear.addEventListener('click', () => {
+    regionEl.value = '';
+    saveRegion();
+    lookup();
+  });
+}
+
+async function lookup(){
+  const number = document.getElementById('number').value.trim();
+  if (!number){ document.getElementById('number').focus(); return; }
+  const region = regionEl.value;
+  const checked = [...document.querySelectorAll('.checks input:checked')].map(c => c.value);
+  const providers = checked.length ? checked.join(',') : 'none';
+
+  go.disabled = true; go.textContent = 'Looking up…';
+  try{
+    const qs = new URLSearchParams({ number, region, providers });
+    const res = await fetch('/api/lookup?' + qs);
+    render(await res.json());
+  } catch(err){
+    out.innerHTML = `<div class="err">Request failed: ${esc(err.message)}</div>`;
+  } finally {
+    go.disabled = false; go.textContent = 'Look up';
+  }
+}
+
+go.addEventListener('click', lookup);
+regionEl.addEventListener('change', saveRegion);
+document.getElementById('number').addEventListener('keydown', e => {
+  if (e.key === 'Enter') lookup();
+});
+document.getElementById('number').focus();
+loadRegions();
+</script>
+</body>
+</html>

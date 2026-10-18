@@ -1,0 +1,35 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "PhoneInfo: web UI",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "phoneinfo",
+      "args": ["--serve"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": true
+    },
+    {
+      "name": "PhoneInfo: lookup (edit args)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "phoneinfo",
+      "args": ["+212661234567"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": true
+    },
+    {
+      "name": "PhoneInfo: lookup with region",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "phoneinfo",
+      "args": ["0684054023", "-r", "MA"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": true
+    }
+  ]
+}
